@@ -18,18 +18,14 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        updateAppWidgets(context, appWidgetManager, appWidgetIds);
+        for (int id : appWidgetIds) {
+            updateAppWidget(context, appWidgetManager, id);
+        }
     }
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
         updateAppWidget(context, appWidgetManager, appWidgetId);
-    }
-
-    private void updateAppWidgets(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
-        for (int id : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, id);
-        }
     }
 
     private void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
@@ -38,28 +34,22 @@ public class MyAppWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.widget_description, "Description");
 
         Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
-        boolean isWidgetExpanded = options.getBoolean(BUNDLE_KEY_WIDGET_EXPANDED);
+        boolean isWidgetExpanded = options.getBoolean(BUNDLE_KEY_WIDGET_EXPANDED, false);
         if (isWidgetExpanded) {
             views.setImageViewResource(R.id.widget_button, R.drawable.ic_arrow_drop_up_black_24dp);
             views.setViewVisibility(R.id.widget_description, VISIBLE);
-
-            Intent intent = new Intent(ACTION_TOGGLE_EXPANSION);
-            intent.setPackage(context.getPackageName());
-            intent.putExtra(BUNDLE_KEY_WIDGET_ID, appWidgetId);
-            intent.putExtra(BUNDLE_KEY_WIDGET_EXPANDED, true);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            views.setOnClickPendingIntent(R.id.widget_button, pendingIntent);
         } else {
             views.setImageViewResource(R.id.widget_button, R.drawable.ic_arrow_drop_down_black_24dp);
             views.setViewVisibility(R.id.widget_description, INVISIBLE);
-
-            Intent intent = new Intent(ACTION_TOGGLE_EXPANSION);
-            intent.setPackage(context.getPackageName());
-            intent.putExtra(BUNDLE_KEY_WIDGET_ID, appWidgetId);
-            intent.putExtra(BUNDLE_KEY_WIDGET_EXPANDED, false);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            views.setOnClickPendingIntent(R.id.widget_button, pendingIntent);
         }
+
+        Intent intent = new Intent(ACTION_TOGGLE_EXPANSION);
+        intent.setPackage(context.getPackageName());
+        intent.putExtra(BUNDLE_KEY_WIDGET_ID, appWidgetId);
+        intent.putExtra(BUNDLE_KEY_WIDGET_EXPANDED, isWidgetExpanded);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        views.setOnClickPendingIntent(R.id.widget_button, pendingIntent);
+
         appWidgetManager.updateAppWidget(appWidgetId, views);
     }
 
